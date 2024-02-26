@@ -9,14 +9,34 @@ on:
 jobs:
   generate-docs:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Generate terraform docs
-        uses: terraform-docs/gh-actions@v1.0.0
         with:
-          working-dir: .
-          output-method: inject
-          git-push: "true"
           ref: ${{ github.event.pull_request.head.ref }}
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+
+      - name: Install dependencies
+        run: go get .
+
+      - name: Install tfplugindocs
+        run: go get github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@latest
+
+      - name: Build
+        run: go build -v ./...
+
+      - name: Generate documentation
+        run: |
+          make generatedocs
+
+      - name: Update Terraform Plugin Documentation
+        uses: ansible-network/github_actions/.github/actions/commit_to_pullrequest@main
+        with:
+          commit_message: "Update Terraform Plugin Documentation"
+          token: ${{ secrets.GH_TOKEN || secrets.GITHUB_TOKEN }}
