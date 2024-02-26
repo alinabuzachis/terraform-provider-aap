@@ -25,4 +25,4 @@ gofmt:
 generatedocs:
 	@echo "==> Formatting examples and generating docs..."
 	terraform fmt -recursive ./examples/
-	go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs generate
+	go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs generate --provider-name terraform-provider-aap --rendered-provider-name "Terraform Provider for Ansible Automation Platform (AAP)" --rendered-website-dir ./docs

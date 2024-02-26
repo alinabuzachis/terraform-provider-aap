@@ -1,4 +1,4 @@
-name: Generate Terraform Plugin Documentation
+name: Generate Terraform Plugin Documentation - 2
 
 on:
   pull_request:
@@ -6,17 +6,41 @@ on:
       - main
       - stable-*
 
+permissions:
+  contents: read
+
 jobs:
   generate-docs:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Generate terraform docs
-        uses: terraform-docs/gh-actions@v1.0.0
         with:
-          working-dir: .
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+
+      - name: Install dependencies
+        run: go get .
+
+      - name: Install tfplugindocs
+        run: go get github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@latest
+
+      - name: Build
+        run: go build -v ./...
+
+      - name: Generate documentation
+        run: make generatedocs
+
+      - name: Check for doc changes
+        run: |
+          git diff --compact-summary --exit-code || \
+            (echo; echo "Unexpected difference in directories after docs generation. Run 'go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs generate --provider-name cdo --rendered-provider-name \"CDO Provider\" --rendered-website-dir ../docs' command from the provider directory and commit."; exit 1)
+
+
 
       # - uses: actions/setup-go@v5
       #   with:

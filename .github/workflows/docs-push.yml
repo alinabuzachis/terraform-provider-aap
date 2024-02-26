@@ -1,4 +1,4 @@
-name: Merge Terraform Plugin Documentation
+name: Merge Terraform Plugin Documentation Changes
 
 on:
   push:
@@ -12,6 +12,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Generate terraform docs
         uses: terraform-docs/gh-actions@v1.0.0
@@ -19,4 +21,5 @@ jobs:
           working-dir: .
           output-method: inject
           git-push: "true"
-          ref: ${{ github.event.pull_request.head.ref }}
+          git-commit-message: 'Update Terraform Plugin Documentation'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
