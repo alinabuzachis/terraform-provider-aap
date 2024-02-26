@@ -1,0 +1,22 @@
+name: Merge Terraform Plugin Documentation
+
+on:
+  push:
+    branches:
+    - main
+    - stable-*
+
+jobs:
+  generate-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate terraform docs
+        uses: terraform-docs/gh-actions@v1.0.0
+        with:
+          working-dir: .
+          output-method: inject
+          git-push: "true"
+          ref: ${{ github.event.pull_request.head.ref }}
